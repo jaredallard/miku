@@ -1,0 +1,7 @@
+vendor/
+bin/
+testdata/
+output/
+.DS_Store
+*.out
+.task
