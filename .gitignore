@@ -2,6 +2,7 @@ vendor/
 bin/
 testdata/
 output/
+dist/
 .DS_Store
 *.out
 .task

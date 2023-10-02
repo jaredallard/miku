@@ -1,11 +1,11 @@
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
-project_name: minecraft-preempt
+project_name: miku
 before:
   hooks:
     - go mod download
 builds:
-  - main: ./cmd/minecraft-preempt
+  - main: ./cmd/{{ .ProjectName }}
     env:
       - CGO_ENABLED=0
     goarch:
