@@ -54,7 +54,7 @@ func main() {
 	}, log)
 
 	// Setup the main handler.
-	bot.AddHandler(h.Handle)
+	bot.AddHandler(h.EventHandler)
 
 	log.Info("Starting bot...")
 	if err := bot.Open(); err != nil {

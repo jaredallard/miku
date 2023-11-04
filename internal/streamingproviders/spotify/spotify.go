@@ -69,6 +69,7 @@ func (p *Provider) Info() streamingproviders.Info {
 		Emoji: discordgo.ComponentEmoji{
 			ID: "1170379904395771904",
 		},
+		URLHostname: "open.spotify.com",
 	}
 }
 
@@ -99,17 +100,7 @@ func (p *Provider) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Son
 // LookupSongByURL returns a song from the provided URL. The URL must
 // match the following format:
 // - https://open.spotify.com/track/1qRbITa6QZoD6kQpBLMgao
-func (p *Provider) LookupSongByURL(ctx context.Context, urlStr string) (*streamingproviders.Song, error) {
-	u, err := url.Parse(urlStr)
-	if err != nil {
-		return nil, err
-	}
-
-	// Only want spotify links.
-	if u.Host != "open.spotify.com" {
-		return nil, fmt.Errorf("invalid host: %s", u.Host)
-	}
-
+func (p *Provider) LookupSongByURL(ctx context.Context, u *url.URL) (*streamingproviders.Song, error) {
 	trackPath, ID := path.Split(u.Path)
 	if trackPath != "/track/" {
 		return nil, fmt.Errorf("invalid path: %s", trackPath)

@@ -20,6 +20,7 @@ package streamingproviders
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -71,6 +72,12 @@ type Info struct {
 
 	// Emoji is the emoji used for this provider.
 	Emoji discordgo.ComponentEmoji
+
+	// URLHostname is the hostname of the provider's website. This is used
+	// to determine if the provider should be used when a link is posted.
+	// If not set, then the provider will be provided all URLs and the
+	// provider should abort if it cannot handle the URL.
+	URLHostname string
 }
 
 // Provider is a streaming provider interface capable of looking up
@@ -81,7 +88,7 @@ type Provider interface {
 	Info() Info
 
 	// LookupSongByURL returns a song from the provided URL.
-	LookupSongByURL(ctx context.Context, url string) (*Song, error)
+	LookupSongByURL(ctx context.Context, url *url.URL) (*Song, error)
 
 	// Search returns a song from this provider using a Song provided from
 	// another provider.

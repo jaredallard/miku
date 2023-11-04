@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
@@ -62,16 +63,22 @@ func New(conf *Config, logger *log.Logger) *Handler {
 		sps = append(sps, sp)
 	}
 
+	return NewWithProviders(conf, logger, sps)
+}
+
+// NewWithProviders creates a new handler with the provided providers.
+func NewWithProviders(conf *Config, logger *log.Logger, sps []streamingproviders.Provider) *Handler {
 	return &Handler{conf, logger, sps}
 }
 
 // Handler implements a discordgo.EventHandler for handling new messages
 // being sent.
-func (h *Handler) Handle(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (h *Handler) EventHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	ctx := context.Background()
 	if m.ChannelID != h.c.ChannelID {
 		return // Ignore things not in our channel.
 	}
+
 	if m.Author.Bot {
 		return // Ignore bots.
 	}
@@ -81,34 +88,45 @@ func (h *Handler) Handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	urlx := xurls.Strict()
 	urls := urlx.FindAllString(m.Content, -1)
 	if len(urls) == 0 {
+		h.log.Debug("no urls found in message")
 		return
 	}
 
 	h.log.With("urls", urls).Debug("found urls")
 
-	// We only support one URL for now.
-	url := urls[0]
+	originalSong, alts, err := h.NewURL(ctx, urls[0])
+	if err != nil {
+		h.log.With("err", err).Error("failed to handle url")
+		return
+	}
 
+	// Send a message back to the user.
+	if err := h.sendMessage(s, m, originalSong, alts); err != nil {
+		h.log.With("err", err).Error("failed to send message")
+		return
+	}
+}
+
+// NewURL takes a URL and searches all enabled providers for it. It then
+// searches all provides (minus the one the song was found on) and
+// returns alternative streamingproviders where that song was found (the
+// alternatives).
+func (h *Handler) NewURL(ctx context.Context, url string) (*streamingproviders.Song,
+	[]*streamingproviders.Song, error) {
 	originalSong, alts := h.findAlts(ctx, url)
 	if len(alts) == 0 {
-		h.log.Info("no alternatives found")
-		return
+		return nil, nil, fmt.Errorf("failed to find alternatives for song")
 	}
 
 	for _, alt := range alts {
 		h.log.With(
-			"song.provider", alt.Provider,
+			"song.provider", alt.Provider.Identifier,
 			"song.title", alt.Title,
 			"song.artists", alt.Artists,
 		).Info("found alternative")
 	}
 
-	if err := h.sendMessage(s, m, originalSong, alts); err != nil {
-		h.log.With("err", err).Error("failed to send message")
-		return
-	}
-
-	h.log.Info("sent message")
+	return originalSong, alts, nil
 }
 
 // sendMessage sends a reply to the original message with information on
@@ -163,37 +181,51 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 	return nil
 }
 
-// findAlts takes a URL and returns a list of all known songs for that
-// URL across enabled providers.
-func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders.Song, []*streamingproviders.Song) {
-	// Determine which streaming provider the song is from first.
-	var song *streamingproviders.Song
+// findOriginalSongByURL iterates over all enabled providers and returns
+// the first song that can be found on a provider. This function will
+// return nil if no song can be found.
+//
+// !!! IMPORTANT: Can return nil. See function definition.
+func (h *Handler) findOriginalSongByURL(ctx context.Context, urlStr string) *streamingproviders.Song {
 	for _, sp := range h.sps {
-		plog := h.log.With("provider.name", sp.Info().Identifier)
+		pinfo := sp.Info()
+		plog := h.log.With("provider.name", pinfo.Identifier)
 
-		plog.Debug("looking for song via URL")
-
-		var err error
-		song, err = sp.LookupSongByURL(ctx, url)
+		u, err := url.Parse(urlStr)
 		if err != nil {
-			plog.With("err", err).Debug("provider failed to lookup song")
+			plog.With("err", err).Error("failed to parse url")
 			continue
 		}
 
-		// Didn't error, use it.
-		plog.Info("found song")
-		break
-	}
-	if song == nil {
-		h.log.Infof("failed to find a streaming provider for the provided song")
-		return nil, nil
+		// If our provider has a hostname, make sure the URL matches it.
+		if pinfo.URLHostname != "" && u.Hostname() != pinfo.URLHostname {
+			plog.Debug("url doesn't match provider's hostname")
+			continue
+		}
+
+		plog.Debug("looking for song via URL")
+
+		song, err := sp.LookupSongByURL(ctx, u)
+		if err == nil { // Found it.
+			plog.Info("found song")
+			return song
+		}
+
+		plog.With("err", err).Debug("provider failed to lookup song")
 	}
 
-	h.log.With(
-		"song.provider", song.Provider,
-		"song.title", song.Title,
-		"song.artists", song.Artists,
-	).Info("found song")
+	// Didn't find it after searching all enabled providers.
+	return nil
+}
+
+// findAlts takes a URL and returns a list of all known songs for that
+// URL across enabled providers.
+func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders.Song, []*streamingproviders.Song) {
+	song := h.findOriginalSongByURL(ctx, url)
+	if song == nil {
+		h.log.Info("failed to find original song for provided URL")
+		return nil, nil
+	}
 
 	// Search all of the providers (minus the one we found it on) for the
 	// song and return all of the results.
@@ -203,8 +235,6 @@ func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders
 			continue
 		}
 
-		// search for song
-		plog := h.log.With("provider.name", sp.Info().Identifier)
 		h.log.Debug("searching for alternative")
 		alt, err := sp.Search(ctx, song)
 		if err != nil {
@@ -212,7 +242,6 @@ func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders
 			continue
 		}
 
-		plog.Info("found alternative")
 		alts = append(alts, alt)
 	}
 

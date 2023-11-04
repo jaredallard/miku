@@ -1,0 +1,22 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.21.3-alpine as builder
+ARG VERSION
+ENV GOCACHE "/go-build-cache"
+ENV CGO_ENABLED 0
+WORKDIR /src
+
+# Copy our source code into the container for building
+COPY . .
+
+# Cache dependencies across builds
+RUN --mount=type=ssh --mount=type=cache,target=/go/pkg go mod download
+
+# Build our application, caching the go build cache, but also using
+# the dependency cache from earlier.
+RUN --mount=type=ssh --mount=type=cache,target=/go/pkg --mount=type=cache,target=/go-build-cache \
+  mkdir -p bin; \
+  go build -o /src/bin/ -ldflags "-w -s" -v ./cmd/...
+
+FROM alpine:3.18
+ENTRYPOINT ["/usr/local/bin/miku"]
+COPY --from=builder /src/bin/ /usr/local/bin/

@@ -1,0 +1,9 @@
+# This is only meant for use in-development.
+version: "3.7"
+
+services:
+  miku:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file: .env.development

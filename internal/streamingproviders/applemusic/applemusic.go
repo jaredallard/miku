@@ -54,22 +54,14 @@ func (p *Provider) Info() streamingproviders.Info {
 		Emoji: discordgo.ComponentEmoji{
 			ID: "1170380264711667822",
 		},
+		URLHostname: "music.apple.com",
 	}
 }
 
 // LookupSongByURL returns a song from the provided URL. URL format
 // should be:
 // https://music.apple.com/us/album/album-name/123456789?i=123456789
-func (p *Provider) LookupSongByURL(ctx context.Context, urlStr string) (*streamingproviders.Song, error) {
-	u, err := url.Parse(urlStr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse url: %w", err)
-	}
-
-	if u.Host != "music.apple.com" {
-		return nil, fmt.Errorf("invalid host: %s", u.Host)
-	}
-
+func (p *Provider) LookupSongByURL(ctx context.Context, u *url.URL) (*streamingproviders.Song, error) {
 	id := u.Query().Get("i")
 	if id == "" {
 		return nil, fmt.Errorf("missing 'i' query parameter")
