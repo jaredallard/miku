@@ -120,11 +120,6 @@ func (p *Provider) LookupSongByURL(ctx context.Context, urlStr string) (*streami
 		return nil, fmt.Errorf("failed to find track with ID %s: %w", ID, err)
 	}
 
-	strArtists := make([]string, 0, len(track.Artists))
-	for _, artist := range track.Artists {
-		strArtists = append(strArtists, artist.Name)
-	}
-
 	return p.songFromTrack(track), nil
 }
 
