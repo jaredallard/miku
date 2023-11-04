@@ -104,6 +104,10 @@ but there are some things that can be good to know:
   they disqualify the provider. So, keep that in mind. Returning errors
   is essentially a good thing to do, while not returning them could
   cause a bad user-experience if bad data is returned.
+* The `New` function of a provider should fail if there is not enough
+  information to successfully instantiate the provider. For example,
+  check auth configuration here. If it's invalid, fail. This will log a
+  warning to the user but otherwise not terminate the program.
 
 Once you've implemented the provider, you can enable it by default by
 adding it to the `New` function in `internal/handler/handler.go`. The
