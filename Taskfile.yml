@@ -12,5 +12,12 @@ tasks:
       - bin/miku
     sources:
       - "./**/*.go"
+      - .tool-versions # Trigger rebuild on Go version changes.
     cmds:
       - go build -trimpath -ldflags="-w -s" -o ./bin/ -v ./cmd/miku
+  dev:
+    watch: true
+    cmds:
+      - pkill miku || true
+      - task: build
+      - ./bin/miku
