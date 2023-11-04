@@ -14,7 +14,7 @@ tasks:
       - "./**/*.go"
       - .tool-versions # Trigger rebuild on Go version changes.
     cmds:
-      - go build -trimpath -ldflags="-w -s" -o ./bin/ -v ./cmd/miku
+      - go build -trimpath -o ./bin/ -v ./cmd/miku
   dev:
     watch: true
     cmds:

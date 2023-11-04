@@ -59,7 +59,7 @@ func New(conf *Config, logger *log.Logger) *Handler {
 			logger.With("err", err).Fatal("failed to create provider")
 		}
 
-		logger.With("provider", sp.Info().Identifier).Info("enabled provider")
+		logger.With("provider.name", sp.Info().Identifier).Info("enabled provider")
 		sps = append(sps, sp)
 	}
 
