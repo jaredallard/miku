@@ -18,10 +18,18 @@
 // geared towards getting song information.
 package streamingproviders
 
-import "context"
+import (
+	"context"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 // Song is a music track.
 type Song struct {
+	// ProviderEmoji is the emoji to use for this this song's provider.
+	// TODO: This shouldn't be here...
+	ProviderEmoji discordgo.ComponentEmoji
+
 	// Provider is the name of the provider that returned this song.
 	Provider string
 
@@ -42,6 +50,10 @@ type Song struct {
 
 	// Album is the album of the song.
 	Album string
+
+	// AlbumArtURL is the URL of the album art for the song. This must be
+	// publicly accessible.
+	AlbumArtURL string
 }
 
 // NewProvider is a function that returns a new Provider. If a provider
@@ -56,6 +68,9 @@ type NewProvider func(ctx context.Context) (Provider, error)
 type Provider interface {
 	// String return the name of the provider.
 	String() string
+
+	// Emoji returns the emoji to use for this provider.
+	Emoji() discordgo.ComponentEmoji
 
 	// LookupSongByURL returns a song from the provided URL.
 	LookupSongByURL(ctx context.Context, url string) (*Song, error)

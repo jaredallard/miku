@@ -24,6 +24,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	goapplemusic "github.com/minchao/go-apple-music"
 )
@@ -48,6 +49,13 @@ func New(ctx context.Context) (streamingproviders.Provider, error) {
 // String returns the name of the provider.
 func (p *Provider) String() string {
 	return "applemusic"
+}
+
+func (p *Provider) Emoji() discordgo.ComponentEmoji {
+	return discordgo.ComponentEmoji{
+		Name: "miku_" + p.String(),
+		ID:   "1170380264711667822",
+	}
 }
 
 // LookupSongByURL returns a song from the provided URL. URL format
@@ -85,13 +93,20 @@ func (p *Provider) LookupSongByURL(ctx context.Context, urlStr string) (*streami
 	// Use the first song.
 	song := songs.Data[0]
 
+	// Crude attempt at getting a 100x100 image. Not sure why they force
+	// you to set the size...
+	artworkURL := strings.Replace(song.Attributes.Artwork.URL, "{w}", "100", 1)
+	artworkURL = strings.Replace(artworkURL, "{h}", "100", 1)
+
 	return &streamingproviders.Song{
-		Provider:    p.String(),
-		ProviderURL: urlStr,
-		ISRC:        song.Attributes.ISRC,
-		Title:       song.Attributes.Name,
-		Artists:     []string{song.Attributes.ArtistName},
-		Album:       song.Attributes.AlbumName,
+		ProviderEmoji: p.Emoji(),
+		Provider:      p.String(),
+		ProviderURL:   urlStr,
+		ISRC:          song.Attributes.ISRC,
+		Title:         song.Attributes.Name,
+		Artists:       []string{song.Attributes.ArtistName},
+		Album:         song.Attributes.AlbumName,
+		AlbumArtURL:   artworkURL,
 	}, nil
 }
 

@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	gospotify "github.com/zmb3/spotify/v2"
 	gospotifyauth "github.com/zmb3/spotify/v2/auth"
@@ -62,6 +63,13 @@ func (s *Spotify) String() string {
 	return "spotify"
 }
 
+func (s *Spotify) Emoji() discordgo.ComponentEmoji {
+	return discordgo.ComponentEmoji{
+		Name: "miku_" + s.String(),
+		ID:   "1170379904395771904",
+	}
+}
+
 // songFromTrack converts a gospotify.FullTrack to a
 // streamingproviders.Song.
 func (s *Spotify) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Song {
@@ -70,13 +78,20 @@ func (s *Spotify) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Song
 		strArtists = append(strArtists, artist.Name)
 	}
 
+	var albumArtURL string
+	if len(t.Album.Images) > 0 {
+		albumArtURL = t.Album.Images[0].URL
+	}
+
 	return &streamingproviders.Song{
-		Provider:    s.String(),
-		ISRC:        t.ExternalIDs["isrc"],
-		ProviderURL: t.ExternalURLs["spotify"],
-		Title:       t.Name,
-		Artists:     strArtists,
-		Album:       t.Album.Name,
+		ProviderEmoji: s.Emoji(),
+		Provider:      s.String(),
+		ISRC:          t.ExternalIDs["isrc"],
+		ProviderURL:   t.ExternalURLs["spotify"],
+		Title:         t.Name,
+		Artists:       strArtists,
+		Album:         t.Album.Name,
+		AlbumArtURL:   albumArtURL,
 	}
 }
 

@@ -10,6 +10,7 @@ require (
 	github.com/minchao/go-apple-music v0.0.0-20230815040201-3b2aec2d7ffe
 	github.com/zmb3/spotify/v2 v2.4.0
 	golang.org/x/oauth2 v0.13.0
+	golang.org/x/text v0.13.0
 	mvdan.cc/xurls/v2 v2.5.0
 )
 

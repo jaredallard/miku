@@ -19,12 +19,17 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	"github.com/jaredallard/miku/internal/streamingproviders/applemusic"
 	"github.com/jaredallard/miku/internal/streamingproviders/spotify"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"mvdan.cc/xurls/v2"
 )
 
@@ -84,7 +89,7 @@ func (h *Handler) Handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// We only support one URL for now.
 	url := urls[0]
 
-	alts := h.findAlts(ctx, url)
+	originalSong, alts := h.findAlts(ctx, url)
 	if len(alts) == 0 {
 		h.log.Info("no alternatives found")
 		return
@@ -97,11 +102,79 @@ func (h *Handler) Handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"song.artists", alt.Artists,
 		).Info("found alternative")
 	}
+
+	if err := h.sendMessage(s, m, originalSong, alts); err != nil {
+		h.log.With("err", err).Error("failed to send message")
+		return
+	}
+
+	h.log.Info("sent message")
+}
+
+// sendMessage sends a reply to the original message with information on
+// the current song as well as alternatives.
+func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, song *streamingproviders.Song,
+	alts []*streamingproviders.Song) error {
+
+	// TODO: do this better.
+	var providerName string
+	for _, r := range cases.Title(language.English).String(song.Provider) {
+		if unicode.IsUpper(r) {
+			providerName += " "
+		}
+		providerName += string(r)
+	}
+
+	msg := &discordgo.MessageSend{
+		Embeds: []*discordgo.MessageEmbed{{
+			Type:        discordgo.EmbedTypeRich,
+			Title:       song.Title,
+			Description: song.Artists[0], // TODO: Support more.
+			URL:         song.ProviderURL,
+			Thumbnail: &discordgo.MessageEmbedThumbnail{
+				URL:    song.AlbumArtURL,
+				Height: 50,
+				Width:  50,
+			},
+			Footer: &discordgo.MessageEmbedFooter{
+				Text: providerName,
+			},
+		}},
+		Reference: m.Reference(),
+	}
+
+	var row []discordgo.MessageComponent
+	for _, alt := range alts {
+		// TODO: add emoji
+		row = append(msg.Components, discordgo.Button{
+			URL:   alt.ProviderURL,
+			Emoji: alt.ProviderEmoji,
+			Style: discordgo.LinkButton,
+		})
+	}
+
+	// We need to wrap the rows in an actionsrow component.
+	msg.Components = append(msg.Components, discordgo.ActionsRow{
+		Components: row,
+	})
+
+	// encode to JSON so we can debug it easier
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal message: %w", err)
+	}
+
+	h.log.With("discord.message", string(b)).Debug("sending message")
+	if _, err := s.ChannelMessageSendComplex(m.ChannelID, msg); err != nil {
+		return fmt.Errorf("failed to send reply: %w", err)
+	}
+
+	return nil
 }
 
 // findAlts takes a URL and returns a list of all known songs for that
 // URL across enabled providers.
-func (h *Handler) findAlts(ctx context.Context, url string) []*streamingproviders.Song {
+func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders.Song, []*streamingproviders.Song) {
 	// Determine which streaming provider the song is from first.
 	var song *streamingproviders.Song
 	for _, sp := range h.sps {
@@ -115,7 +188,7 @@ func (h *Handler) findAlts(ctx context.Context, url string) []*streamingprovider
 	}
 	if song == nil {
 		h.log.Infof("failed to find a streaming provider")
-		return nil
+		return nil, nil
 	}
 
 	h.log.With(
@@ -143,5 +216,5 @@ func (h *Handler) findAlts(ctx context.Context, url string) []*streamingprovider
 		alts = append(alts, alt)
 	}
 
-	return alts
+	return song, alts
 }
