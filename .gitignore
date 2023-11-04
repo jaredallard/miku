@@ -6,3 +6,5 @@ dist/
 .DS_Store
 *.out
 .task
+
+.env.development
