@@ -79,6 +79,38 @@ Export env vars from `.env.development`:
 set -o allexport && source .env.development && set +o allexport
 ```
 
+### Adding a New Provider
+
+Adding a new provider is fairly straight forward. The provider interface
+is only concerned with two things:
+
+ * Finding a song by URL
+ * Searching for a song
+
+The interface is defined in the `internal/streamingproviders` package: 
+
+[type Provider interface {](https://github.com/jaredallard/miku/blob/aedf76bdb5c51e62b21f1420a8657e3216e4b753/internal/streamingproviders/streamingproviders.go#L86-L97)
+
+The implementation of each function should be pretty straight forward,
+but there are some things that can be good to know:
+
+* Searching for a song _should_ be done using the song's ISRC. This is
+  the most accurate (and easiest) way to find a song. However, some
+  providers may not support searching by it, or it may be empty on the
+  song. In this case, you can use the song's name and artist to search
+  for it. This is less accurate, but should work in most cases.
+* When implementing the `Info` function, try to set all fields. This
+  will result in the best experience using the provider, but also the
+  most performant.
+* Errors returned by all functions do NOT terminate the program, instead
+  they disqualify the provider. So, keep that in mind. Returning errors
+  is essentially a good thing to do, while not returning them could
+  cause a bad user-experience if bad data is returned.
+
+Once you've implemented the provider, you can enable it by default by
+adding it to the `New` function in `internal/handler/handler.go`. The
+default providers are instantiated there to prevent an import cycle.
+
 ## License
 
 GPL-3.0-only
