@@ -26,12 +26,8 @@ import (
 
 // Song is a music track.
 type Song struct {
-	// ProviderEmoji is the emoji to use for this this song's provider.
-	// TODO: This shouldn't be here...
-	ProviderEmoji discordgo.ComponentEmoji
-
 	// Provider is the name of the provider that returned this song.
-	Provider string
+	Provider Info
 
 	// ProviderURL is the URL of the song on the provider's website. This
 	// should be publicly accessible.
@@ -62,15 +58,27 @@ type Song struct {
 // is required, otherwise consider it disabled.
 type NewProvider func(ctx context.Context) (Provider, error)
 
+// Info is a struct containing information about a provider. All
+// providers must return this in it's
+type Info struct {
+	// Identifier is the unique identifier for this provider. It should
+	// not be used for display purposes.
+	Identifier string
+
+	// Name is a user friendly name of the provider. It should not be used
+	// for unique identification.
+	Name string
+
+	// Emoji is the emoji used for this provider.
+	Emoji discordgo.ComponentEmoji
+}
+
 // Provider is a streaming provider interface capable of looking up
 // songs by URLs or search queries and returning information about
 // them.
 type Provider interface {
-	// String return the name of the provider.
-	String() string
-
-	// Emoji returns the emoji to use for this provider.
-	Emoji() discordgo.ComponentEmoji
+	// Info returns information about this provider.
+	Info() Info
 
 	// LookupSongByURL returns a song from the provided URL.
 	LookupSongByURL(ctx context.Context, url string) (*Song, error)

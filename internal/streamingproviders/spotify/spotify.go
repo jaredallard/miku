@@ -31,9 +31,12 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-var _ streamingproviders.Provider = &Spotify{}
+// _ ensures that Provider implements the streamingproviders.Provider
+// interface.
+var _ streamingproviders.Provider = &Provider{}
 
-type Spotify struct {
+// Provider implements a streamingproviders.Provider for Spotify.
+type Provider struct {
 	client *gospotify.Client
 }
 
@@ -55,24 +58,23 @@ func New(ctx context.Context) (streamingproviders.Provider, error) {
 		log.Fatalf("couldn't get token: %v", err)
 	}
 
-	return &Spotify{gospotify.New(gospotifyauth.New().Client(ctx, token))}, nil
+	return &Provider{gospotify.New(gospotifyauth.New().Client(ctx, token))}, nil
 }
 
-// String returns the name of the provider.
-func (s *Spotify) String() string {
-	return "spotify"
-}
-
-func (s *Spotify) Emoji() discordgo.ComponentEmoji {
-	return discordgo.ComponentEmoji{
-		Name: "miku_" + s.String(),
-		ID:   "1170379904395771904",
+// Info returns information about this provider.
+func (p *Provider) Info() streamingproviders.Info {
+	return streamingproviders.Info{
+		Identifier: "spotify",
+		Name:       "Spotify",
+		Emoji: discordgo.ComponentEmoji{
+			ID: "1170379904395771904",
+		},
 	}
 }
 
 // songFromTrack converts a gospotify.FullTrack to a
 // streamingproviders.Song.
-func (s *Spotify) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Song {
+func (p *Provider) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Song {
 	strArtists := make([]string, 0, len(t.Artists))
 	for _, artist := range t.Artists {
 		strArtists = append(strArtists, artist.Name)
@@ -84,21 +86,20 @@ func (s *Spotify) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Song
 	}
 
 	return &streamingproviders.Song{
-		ProviderEmoji: s.Emoji(),
-		Provider:      s.String(),
-		ISRC:          t.ExternalIDs["isrc"],
-		ProviderURL:   t.ExternalURLs["spotify"],
-		Title:         t.Name,
-		Artists:       strArtists,
-		Album:         t.Album.Name,
-		AlbumArtURL:   albumArtURL,
+		Provider:    p.Info(),
+		ISRC:        t.ExternalIDs["isrc"],
+		ProviderURL: t.ExternalURLs["spotify"],
+		Title:       t.Name,
+		Artists:     strArtists,
+		Album:       t.Album.Name,
+		AlbumArtURL: albumArtURL,
 	}
 }
 
 // LookupSongByURL returns a song from the provided URL. The URL must
 // match the following format:
 // - https://open.spotify.com/track/1qRbITa6QZoD6kQpBLMgao
-func (s *Spotify) LookupSongByURL(ctx context.Context, urlStr string) (*streamingproviders.Song, error) {
+func (p *Provider) LookupSongByURL(ctx context.Context, urlStr string) (*streamingproviders.Song, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
@@ -114,7 +115,7 @@ func (s *Spotify) LookupSongByURL(ctx context.Context, urlStr string) (*streamin
 		return nil, fmt.Errorf("invalid path: %s", trackPath)
 	}
 
-	track, err := s.client.GetTrack(ctx, gospotify.ID(ID))
+	track, err := p.client.GetTrack(ctx, gospotify.ID(ID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to find track with ID %s: %w", ID, err)
 	}
@@ -124,13 +125,13 @@ func (s *Spotify) LookupSongByURL(ctx context.Context, urlStr string) (*streamin
 		strArtists = append(strArtists, artist.Name)
 	}
 
-	return s.songFromTrack(track), nil
+	return p.songFromTrack(track), nil
 }
 
 // Search returns a song from this provider using a Song provided from
 // another provider.
-func (s *Spotify) Search(ctx context.Context, song *streamingproviders.Song) (*streamingproviders.Song, error) {
-	res, err := s.client.Search(ctx, "isrc:"+song.ISRC, gospotify.SearchTypeTrack)
+func (p *Provider) Search(ctx context.Context, song *streamingproviders.Song) (*streamingproviders.Song, error) {
+	res, err := p.client.Search(ctx, "isrc:"+song.ISRC, gospotify.SearchTypeTrack)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for song: %w", err)
 	}
@@ -140,5 +141,5 @@ func (s *Spotify) Search(ctx context.Context, song *streamingproviders.Song) (*s
 	}
 
 	track := res.Tracks.Tracks[0]
-	return s.songFromTrack(&track), nil
+	return p.songFromTrack(&track), nil
 }

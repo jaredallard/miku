@@ -12,9 +12,10 @@ between each other.
 2. Invite the bot to your server using the following URL (change the
    client ID to your bot's client ID):
    <https://discord.com/api/oauth2/authorize?client_id=<client_id>&permissions=3072&scope=bot>
-   
 
 Apple Music:
+
+**TODO**
 
 ```bash
 go run \

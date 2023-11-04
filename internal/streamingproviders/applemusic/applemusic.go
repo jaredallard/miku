@@ -46,15 +46,14 @@ func New(ctx context.Context) (streamingproviders.Provider, error) {
 	return &Provider{client}, nil
 }
 
-// String returns the name of the provider.
-func (p *Provider) String() string {
-	return "applemusic"
-}
-
-func (p *Provider) Emoji() discordgo.ComponentEmoji {
-	return discordgo.ComponentEmoji{
-		Name: "miku_" + p.String(),
-		ID:   "1170380264711667822",
+// Info returns information about this provider.
+func (p *Provider) Info() streamingproviders.Info {
+	return streamingproviders.Info{
+		Identifier: "applemusic",
+		Name:       "Apple Music",
+		Emoji: discordgo.ComponentEmoji{
+			ID: "1170380264711667822",
+		},
 	}
 }
 
@@ -92,26 +91,43 @@ func (p *Provider) LookupSongByURL(ctx context.Context, urlStr string) (*streami
 
 	// Use the first song.
 	song := songs.Data[0]
+	return p.musicSongToSong(&song), nil
+}
 
+// musicSongToSong converts a goapplemusic.Song to a
+// streamingproviders.Song.
+func (p *Provider) musicSongToSong(song *goapplemusic.Song) *streamingproviders.Song {
 	// Crude attempt at getting a 100x100 image. Not sure why they force
 	// you to set the size...
 	artworkURL := strings.Replace(song.Attributes.Artwork.URL, "{w}", "100", 1)
 	artworkURL = strings.Replace(artworkURL, "{h}", "100", 1)
 
 	return &streamingproviders.Song{
-		ProviderEmoji: p.Emoji(),
-		Provider:      p.String(),
-		ProviderURL:   urlStr,
-		ISRC:          song.Attributes.ISRC,
-		Title:         song.Attributes.Name,
-		Artists:       []string{song.Attributes.ArtistName},
-		Album:         song.Attributes.AlbumName,
-		AlbumArtURL:   artworkURL,
-	}, nil
+		Provider:    p.Info(),
+		ProviderURL: song.Attributes.URL,
+		ISRC:        song.Attributes.ISRC,
+		Title:       song.Attributes.Name,
+		Artists:     []string{song.Attributes.ArtistName},
+		Album:       song.Attributes.AlbumName,
+		AlbumArtURL: artworkURL,
+	}
 }
 
 // Search returns a song from this provider using a Song provided
 // from another provider.
 func (p *Provider) Search(ctx context.Context, song *streamingproviders.Song) (*streamingproviders.Song, error) {
-	return nil, fmt.Errorf("not implemented")
+	// TODO: How do we support other storefronts?
+	songs, _, err := p.client.Catalog.GetSongsByIsrcs(ctx,
+		"us", []string{song.ISRC}, &goapplemusic.Options{},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get song: %w", err)
+	}
+	if len(songs.Data) == 0 {
+		return nil, fmt.Errorf("no songs returned")
+	}
+
+	// Use the first song.
+	alt := songs.Data[0]
+	return p.musicSongToSong(&alt), nil
 }

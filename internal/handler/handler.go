@@ -21,15 +21,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	"github.com/jaredallard/miku/internal/streamingproviders/applemusic"
 	"github.com/jaredallard/miku/internal/streamingproviders/spotify"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"mvdan.cc/xurls/v2"
 )
 
@@ -61,7 +58,7 @@ func New(conf *Config, logger *log.Logger) *Handler {
 			logger.With("err", err).Fatal("failed to create provider")
 		}
 
-		logger.With("provider", sp).Info("enabled provider")
+		logger.With("provider", sp.Info().Identifier).Info("enabled provider")
 		sps = append(sps, sp)
 	}
 
@@ -73,7 +70,10 @@ func New(conf *Config, logger *log.Logger) *Handler {
 func (h *Handler) Handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	ctx := context.Background()
 	if m.ChannelID != h.c.ChannelID {
-		return // Ignore things not in our testing channel.
+		return // Ignore things not in our channel.
+	}
+	if m.Author.Bot {
+		return // Ignore bots.
 	}
 
 	h.log.With("message.contents", m.Content).Debug("observed message")
@@ -116,15 +116,6 @@ func (h *Handler) Handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, song *streamingproviders.Song,
 	alts []*streamingproviders.Song) error {
 
-	// TODO: do this better.
-	var providerName string
-	for _, r := range cases.Title(language.English).String(song.Provider) {
-		if unicode.IsUpper(r) {
-			providerName += " "
-		}
-		providerName += string(r)
-	}
-
 	msg := &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{{
 			Type:        discordgo.EmbedTypeRich,
@@ -137,7 +128,7 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 				Width:  50,
 			},
 			Footer: &discordgo.MessageEmbedFooter{
-				Text: providerName,
+				Text: song.Provider.Name,
 			},
 		}},
 		Reference: m.Reference(),
@@ -148,7 +139,7 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 		// TODO: add emoji
 		row = append(msg.Components, discordgo.Button{
 			URL:   alt.ProviderURL,
-			Emoji: alt.ProviderEmoji,
+			Emoji: alt.Provider.Emoji,
 			Style: discordgo.LinkButton,
 		})
 	}
@@ -178,16 +169,23 @@ func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders
 	// Determine which streaming provider the song is from first.
 	var song *streamingproviders.Song
 	for _, sp := range h.sps {
-		h.log.Debug("checking provider", "provider", sp)
+		plog := h.log.With("provider.name", sp.Info().Identifier)
+
+		plog.Debug("looking for song via URL")
 
 		var err error
 		song, err = sp.LookupSongByURL(ctx, url)
 		if err != nil {
-			h.log.With("err", err).Debug("provider failed to lookup song")
+			plog.With("err", err).Debug("provider failed to lookup song")
+			continue
 		}
+
+		// Didn't error, use it.
+		plog.Info("found song")
+		break
 	}
 	if song == nil {
-		h.log.Infof("failed to find a streaming provider")
+		h.log.Infof("failed to find a streaming provider for the provided song")
 		return nil, nil
 	}
 
@@ -201,18 +199,20 @@ func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders
 	// song and return all of the results.
 	var alts []*streamingproviders.Song
 	for _, sp := range h.sps {
-		if sp.String() == song.Provider {
+		if sp.Info().Identifier == song.Provider.Identifier {
 			continue
 		}
 
 		// search for song
-		h.log.With("provider", sp).Debug("searching for song")
+		plog := h.log.With("provider.name", sp.Info().Identifier)
+		h.log.Debug("searching for alternative")
 		alt, err := sp.Search(ctx, song)
 		if err != nil {
 			h.log.With("err", err).Debug("failed to search for song")
 			continue
 		}
 
+		plog.Info("found alternative")
 		alts = append(alts, alt)
 	}
 
