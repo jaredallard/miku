@@ -87,9 +87,7 @@ is only concerned with two things:
  * Finding a song by URL
  * Searching for a song
 
-The interface is defined in the `internal/streamingproviders` package: 
-
-[type Provider interface {](https://github.com/jaredallard/miku/blob/aedf76bdb5c51e62b21f1420a8657e3216e4b753/internal/streamingproviders/streamingproviders.go#L86-L97)
+The interface is defined in the [`internal/streamingproviders`](https://github.com/jaredallard/miku/blob/aedf76bdb5c51e62b21f1420a8657e3216e4b753/internal/streamingproviders/streamingproviders.go#L86-L97) package.
 
 The implementation of each function should be pretty straight forward,
 but there are some things that can be good to know:
