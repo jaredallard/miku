@@ -152,9 +152,13 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 		Reference: m.Reference(),
 	}
 
+	// Create a copy of alts with the original song. We want to show it at
+	// the end of the message.
+	songEmbeds := append([]*streamingproviders.Song{}, alts...)
+	songEmbeds = append(songEmbeds, song)
+
 	var row []discordgo.MessageComponent
-	for _, alt := range alts {
-		// TODO: add emoji
+	for _, alt := range songEmbeds {
 		row = append(msg.Components, discordgo.Button{
 			URL:   alt.ProviderURL,
 			Emoji: alt.Provider.Emoji,
