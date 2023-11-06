@@ -159,7 +159,7 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 
 	var row []discordgo.MessageComponent
 	for _, alt := range songEmbeds {
-		row = append(msg.Components, discordgo.Button{
+		row = append(row, discordgo.Button{
 			URL:   alt.ProviderURL,
 			Emoji: alt.Provider.Emoji,
 			Style: discordgo.LinkButton,
