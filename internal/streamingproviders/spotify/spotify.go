@@ -19,7 +19,6 @@ package spotify
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"path"
@@ -53,12 +52,7 @@ func New(ctx context.Context) (streamingproviders.Provider, error) {
 		ClientSecret: clientSecret,
 		TokenURL:     gospotifyauth.TokenURL,
 	}
-	token, err := config.Token(ctx)
-	if err != nil {
-		log.Fatalf("couldn't get token: %v", err)
-	}
-
-	return &Provider{gospotify.New(gospotifyauth.New().Client(ctx, token))}, nil
+	return &Provider{gospotify.New(config.Client(ctx))}, nil
 }
 
 // Info returns information about this provider.

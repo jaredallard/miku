@@ -68,6 +68,18 @@ Set the following environment variables:
 MIKU_APPLE_MUSIC_API_TOKEN="<Generated Token From Step 3>"
 ```
 
+### Tidal
+
+1. Create a new Tidal app at the [App Dashboard](https://developer.tidal.com/dashboard).
+2. Take note of the Client ID and Client Secret.
+
+Set the following environment variables:
+
+```bash
+MIKU_TIDAL_CLIENT_ID="<Client ID>"
+MIKU_TIDAL_CLIENT_SECRET="<Client Secret>"
+```
+
 ## Development
 
 Setup a `.env.development` using the provider documentation above.

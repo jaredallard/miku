@@ -114,6 +114,15 @@ func (h *Handler) EventHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 func (h *Handler) NewURL(ctx context.Context, url string) (*streamingproviders.Song,
 	[]*streamingproviders.Song, error) {
 	originalSong, alts := h.findAlts(ctx, url)
+	if originalSong == nil {
+		return nil, nil, fmt.Errorf("failed to find original song")
+	}
+	h.log.With(
+		"song.isrc", originalSong.ISRC,
+		"song.provider", originalSong.Provider.Identifier,
+		"song.title", originalSong.Title,
+		"song.artists", originalSong.Artists,
+	).Info("found original song")
 	if len(alts) == 0 {
 		return nil, nil, fmt.Errorf("failed to find alternatives for song")
 	}
@@ -227,7 +236,6 @@ func (h *Handler) findOriginalSongByURL(ctx context.Context, urlStr string) *str
 func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders.Song, []*streamingproviders.Song) {
 	song := h.findOriginalSongByURL(ctx, url)
 	if song == nil {
-		h.log.Info("failed to find original song for provided URL")
 		return nil, nil
 	}
 
