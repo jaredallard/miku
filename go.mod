@@ -6,7 +6,7 @@ require (
 	github.com/FedorLap2006/disgolf v0.0.0-20221004200601-99cfc3d9a0e1
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/charmbracelet/log v0.2.5
-	github.com/getoutreach/gobox v1.82.2
+	github.com/getoutreach/gobox v1.82.3
 	github.com/minchao/go-apple-music v0.0.0-20230815040201-3b2aec2d7ffe
 	github.com/zmb3/spotify/v2 v2.4.0
 	golang.org/x/oauth2 v0.13.0
