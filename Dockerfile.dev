@@ -17,6 +17,6 @@ RUN --mount=type=ssh --mount=type=cache,target=/go/pkg --mount=type=cache,target
   mkdir -p bin; \
   go build -o /src/bin/ -ldflags "-w -s" -v ./cmd/...
 
-FROM alpine:3.18
+FROM alpine:3.19
 ENTRYPOINT ["/usr/local/bin/miku"]
 COPY --from=builder /src/bin/ /usr/local/bin/
