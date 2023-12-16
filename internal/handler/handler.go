@@ -50,18 +50,23 @@ type Handler struct {
 func New(conf *Config, logger *log.Logger) *Handler {
 	sps := make([]streamingproviders.Provider, 0)
 
-	enabledProviders := []func(ctx context.Context) (streamingproviders.Provider, error){
+	enabledProviders := []func(context.Context, *log.Logger) (streamingproviders.Provider, error){
 		spotify.New,
 		applemusic.New,
 		tidal.New,
 	}
 	for _, provider := range enabledProviders {
-		sp, err := provider(context.Background())
+		plog := logger.With()
+
+		sp, err := provider(context.Background(), plog)
 		if err != nil {
 			logger.With("err", err).Fatal("failed to create provider")
 		}
 
-		logger.With("provider.name", sp.Info().Identifier).Info("enabled provider")
+		// update the logger to include the provider name
+		(*plog) = *plog.With("provider.id", sp.Info().Identifier)
+
+		plog.Info("enabled provider")
 		sps = append(sps, sp)
 	}
 
@@ -204,7 +209,7 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 func (h *Handler) findOriginalSongByURL(ctx context.Context, urlStr string) *streamingproviders.Song {
 	for _, sp := range h.sps {
 		pinfo := sp.Info()
-		plog := h.log.With("provider.name", pinfo.Identifier)
+		plog := h.log.With("provider.id", pinfo.Identifier)
 
 		u, err := url.Parse(urlStr)
 		if err != nil {
@@ -249,7 +254,7 @@ func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders
 			continue
 		}
 
-		h.log.Debug("searching for alternative")
+		h.log.With("provider.id", sp.Info().Identifier).Debug("searching for alternative")
 		alt, err := sp.Search(ctx, song)
 		if err != nil {
 			h.log.With("err", err).Debug("failed to search for song")

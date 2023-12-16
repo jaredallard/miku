@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	goapplemusic "github.com/minchao/go-apple-music"
 )
@@ -38,7 +39,7 @@ type Provider struct {
 // New returns a new streamingprovider.Provider for Apple Music.
 // Requires the following environment variables:
 // - MIKU_APPLE_MUSIC_API_TOKEN
-func New(ctx context.Context) (streamingproviders.Provider, error) {
+func New(ctx context.Context, _ *log.Logger) (streamingproviders.Provider, error) {
 	token := os.Getenv("MIKU_APPLE_MUSIC_API_TOKEN")
 
 	tp := goapplemusic.Transport{Token: token}

@@ -19,9 +19,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 
+	"github.com/charmbracelet/log"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
@@ -34,18 +36,20 @@ var tidalAPI = &url.URL{
 // client is a TIDAL API client.
 type client struct {
 	client *http.Client
+
+	log *log.Logger
 }
 
 // newClient creates a new client using the provided clientID and
 // clientSecret.
-func newClient(ctx context.Context, clientID, clientSecret string) (*client, error) {
+func newClient(ctx context.Context, clientID, clientSecret string, log *log.Logger) (*client, error) {
 	config := &clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		TokenURL:     "https://auth.tidal.com/v1/oauth2/token",
 	}
 
-	return &client{config.Client(ctx)}, nil
+	return &client{config.Client(ctx), log}, nil
 }
 
 func (c *client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
@@ -58,7 +62,23 @@ func (c *client) do(ctx context.Context, req *http.Request) (*http.Response, err
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	logWith := c.log.With(
+		"response.status", resp.StatusCode,
+		"request.method", req.Method,
+		"request.url", req.URL.String(),
+	)
+	defer func() {
+		logWith.Debug("request to TIDAL API completed")
+	}()
+
+	// Accept any 2xx status code.
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		// Read up to 5KB of the response body to get more details.
+		b, err := io.ReadAll(io.LimitReader(resp.Body, 1024*5))
+		if err == nil {
+			logWith = logWith.With("response.body", string(b))
+		}
+
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
@@ -75,7 +95,6 @@ func (c *client) get(ctx context.Context, url string, params map[string]string) 
 	}
 	reqURL.RawQuery = reqQuery.Encode()
 
-	fmt.Println("GET", reqURL.String())
 	req, err := http.NewRequest("GET", reqURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -83,7 +102,8 @@ func (c *client) get(ctx context.Context, url string, params map[string]string) 
 	return c.do(ctx, req)
 }
 
-// GetByISRC returns a resource by its ISRC.
+// GetByISRC returns a resource by its ISRC. If multiple results are
+// returned from the API, only the first result is returned.
 func (c *client) GetByISRC(ctx context.Context, isrc, countryCode string) (*Resource, error) {
 	resp, err := c.get(ctx, "/tracks/byIsrc", map[string]string{
 		"isrc":        isrc,
@@ -104,7 +124,7 @@ func (c *client) GetByISRC(ctx context.Context, isrc, countryCode string) (*Reso
 	}
 
 	if len(l.Data) > 1 {
-		return nil, fmt.Errorf("multiple tracks found")
+		c.log.Debug("multiple tracks found, using first one")
 	}
 
 	return l.Data[0].Resource, nil

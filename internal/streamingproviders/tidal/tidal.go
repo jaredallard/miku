@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 )
 
@@ -41,11 +42,11 @@ type Provider struct {
 // variables:
 // - MIKU_TIDAL_CLIENT_ID
 // - MIKU_TIDAL_CLIENT_SECRET
-func New(ctx context.Context) (streamingproviders.Provider, error) {
+func New(ctx context.Context, log *log.Logger) (streamingproviders.Provider, error) {
 	clientID := os.Getenv("MIKU_TIDAL_CLIENT_ID")
 	clientSecret := os.Getenv("MIKU_TIDAL_CLIENT_SECRET")
 
-	c, err := newClient(ctx, clientID, clientSecret)
+	c, err := newClient(ctx, clientID, clientSecret, log)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client: %w", err)
 	}

@@ -24,6 +24,7 @@ import (
 	"path"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	gospotify "github.com/zmb3/spotify/v2"
 	gospotifyauth "github.com/zmb3/spotify/v2/auth"
@@ -43,7 +44,7 @@ type Provider struct {
 // variables:
 // - MIKU_SPOTIFY_CLIENT_ID
 // - MIKU_SPOTIFY_CLIENT_SECRET
-func New(ctx context.Context) (streamingproviders.Provider, error) {
+func New(ctx context.Context, _ *log.Logger) (streamingproviders.Provider, error) {
 	clientID := os.Getenv("MIKU_SPOTIFY_CLIENT_ID")
 	clientSecret := os.Getenv("MIKU_SPOTIFY_CLIENT_SECRET")
 
