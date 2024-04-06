@@ -7,7 +7,7 @@ require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/charmbracelet/log v0.4.0
 	github.com/minchao/go-apple-music v0.0.0-20230815040201-3b2aec2d7ffe
-	github.com/zmb3/spotify/v2 v2.4.0
+	github.com/zmb3/spotify/v2 v2.4.1
 	golang.org/x/oauth2 v0.15.0
 	golang.org/x/term v0.19.0
 	mvdan.cc/xurls/v2 v2.5.0
