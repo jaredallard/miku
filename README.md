@@ -127,4 +127,4 @@ default providers are instantiated there to prevent an import cycle.
 
 ## License
 
-GPL-3.0-only
+GPL-3.0

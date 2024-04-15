@@ -174,10 +174,11 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 	songEmbeds = append(songEmbeds, song)
 
 	var row []discordgo.MessageComponent
-	for _, alt := range songEmbeds {
+	for i := range songEmbeds {
+		alt := songEmbeds[i]
 		row = append(row, discordgo.Button{
 			URL:   alt.ProviderURL,
-			Emoji: alt.Provider.Emoji,
+			Emoji: &alt.Provider.Emoji,
 			Style: discordgo.LinkButton,
 		})
 	}
