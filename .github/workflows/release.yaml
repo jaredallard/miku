@@ -44,7 +44,8 @@ jobs:
         uses: thenativeweb/get-next-version@main
         with:
           prefix: "v" # optional, defaults to ''
-      - uses: trstringer/manual-approval@v1
+      - name: Wait for manual approval
+        uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: "jaredallard"
