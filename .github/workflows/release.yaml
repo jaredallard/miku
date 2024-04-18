@@ -1,4 +1,4 @@
-name: goreleaser
+name: release
 
 on:
   # Only run when triggered through the Github UI or API.
@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  goreleaser:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
