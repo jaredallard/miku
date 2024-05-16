@@ -85,6 +85,7 @@ func (p *Provider) songFromTrack(r *Resource) *streamingproviders.Song {
 		Title:       r.Title,
 		Artists:     strArtists,
 		Album:       r.Album.Title,
+		Duration:    r.Duration,
 		AlbumArtURL: albumArtURL,
 	}
 }

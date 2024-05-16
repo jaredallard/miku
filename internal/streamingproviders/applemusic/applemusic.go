@@ -102,6 +102,7 @@ func (p *Provider) musicSongToSong(song *goapplemusic.Song) *streamingproviders.
 		Title:       song.Attributes.Name,
 		Artists:     []string{song.Attributes.ArtistName},
 		Album:       song.Attributes.AlbumName,
+		Duration:    int(song.Attributes.DurationInMillis / 1000),
 		AlbumArtURL: artworkURL,
 	}
 }

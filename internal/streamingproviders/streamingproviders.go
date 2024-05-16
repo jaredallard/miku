@@ -51,6 +51,9 @@ type Song struct {
 	// AlbumArtURL is the URL of the album art for the song. This must be
 	// publicly accessible.
 	AlbumArtURL string
+
+	// Duration is the duration of the song in seconds.
+	Duration int
 }
 
 // NewProvider is a function that returns a new Provider. If a provider

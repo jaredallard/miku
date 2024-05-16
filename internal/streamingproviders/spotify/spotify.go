@@ -88,6 +88,7 @@ func (p *Provider) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Son
 		Title:       t.Name,
 		Artists:     strArtists,
 		Album:       t.Album.Name,
+		Duration:    int(t.Duration),
 		AlbumArtURL: albumArtURL,
 	}
 }

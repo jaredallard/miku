@@ -150,6 +150,9 @@ func (h *Handler) NewURL(ctx context.Context, url string) (*streamingproviders.S
 func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, song *streamingproviders.Song,
 	alts []*streamingproviders.Song) error {
 
+	// Convert the duration into a human readable format.
+	duration := fmt.Sprintf("%d:%02d", song.Duration/60, song.Duration%60)
+
 	msg := &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{{
 			Type:        discordgo.EmbedTypeRich,
@@ -162,10 +165,9 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 				Width:  50,
 			},
 			Footer: &discordgo.MessageEmbedFooter{
-				Text: song.Provider.Name,
+				Text: fmt.Sprintf("%s · Duration %s · Shared by @%s", song.Provider.Name, duration, m.Author.Username),
 			},
 		}},
-		Reference: m.Reference(),
 	}
 
 	// Create a copy of alts with the original song. We want to show it at
@@ -192,6 +194,11 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 	b, err := json.Marshal(msg)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
+	}
+
+	h.log.With("discord.message", string(m.Reference().MessageID)).Debug("deleting original message")
+	if err := s.ChannelMessageDelete(m.ChannelID, m.ID); err != nil {
+		return fmt.Errorf("failed to delete original message: %w", err)
 	}
 
 	h.log.With("discord.message", string(b)).Debug("sending message")
