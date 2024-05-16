@@ -1,11 +1,23 @@
-# miku
+<div align="center">
+    <img src=".github/images/example.png" alt="miku example" width="300" />
 
-A Discord bot to convert media links (e.g., Spotify, Apple Music)
-between each other.
+  <p><em>A Discord bot to convert media links (e.g., Spotify, Apple Music) between each other.</em></p>
+
+  <a href="https://github.com/jaredallard/miku/releases">
+    <img alt="Latest Version" src="https://img.shields.io/github/v/release/jaredallard/miku?style=for-the-badge">
+  </a>
+  <a href="https://github.com/jaredallard/miku/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/github/license/jaredallard/miku?style=for-the-badge">
+  </a>
+  <a href="https://github.com/jaredallard/miku/actions/workflows/tests.yaml">
+    <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/jaredallard/miku/tests.yaml?style=for-the-badge">
+  </a>
+  <hr />
+</div>
 
 ## Usage
 
-While each provider has its own authenticiation requirements, the bot
+While each provider has its own authentication requirements, the bot
 will at minimum require a Discord bot. To create one, follow the steps
 below:
 
@@ -96,27 +108,27 @@ set -o allexport && source .env.development && set +o allexport
 Adding a new provider is fairly straight forward. The provider interface
 is only concerned with two things:
 
- * Finding a song by URL
- * Searching for a song
+- Finding a song by URL
+- Searching for a song
 
 The interface is defined in the [`internal/streamingproviders`](https://github.com/jaredallard/miku/blob/aedf76bdb5c51e62b21f1420a8657e3216e4b753/internal/streamingproviders/streamingproviders.go#L86-L97) package.
 
 The implementation of each function should be pretty straight forward,
 but there are some things that can be good to know:
 
-* Searching for a song _should_ be done using the song's ISRC. This is
+- Searching for a song _should_ be done using the song's ISRC. This is
   the most accurate (and easiest) way to find a song. However, some
   providers may not support searching by it, or it may be empty on the
   song. In this case, you can use the song's name and artist to search
   for it. This is less accurate, but should work in most cases.
-* When implementing the `Info` function, try to set all fields. This
+- When implementing the `Info` function, try to set all fields. This
   will result in the best experience using the provider, but also the
   most performant.
-* Errors returned by all functions do NOT terminate the program, instead
+- Errors returned by all functions do NOT terminate the program, instead
   they disqualify the provider. So, keep that in mind. Returning errors
   is essentially a good thing to do, while not returning them could
   cause a bad user-experience if bad data is returned.
-* The `New` function of a provider should fail if there is not enough
+- The `New` function of a provider should fail if there is not enough
   information to successfully instantiate the provider. For example,
   check auth configuration here. If it's invalid, fail. This will log a
   warning to the user but otherwise not terminate the program.
