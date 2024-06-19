@@ -88,7 +88,8 @@ func (p *Provider) songFromTrack(t *gospotify.FullTrack) *streamingproviders.Son
 		Title:       t.Name,
 		Artists:     strArtists,
 		Album:       t.Album.Name,
-		Duration:    int(t.Duration),
+		// Convert milliseconds to seconds.
+		Duration:    int(t.Duration) / 1000,
 		AlbumArtURL: albumArtURL,
 	}
 }
