@@ -20,6 +20,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -28,11 +29,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/handler"
+	"github.com/jaredallard/miku/internal/version"
 	"golang.org/x/term"
 )
-
-// Version is current version of miku.
-var Version = "dev"
 
 // main implements the miku CLI.
 func main() {
@@ -55,7 +54,7 @@ func main() {
 		logger.SetFormatter(log.JSONFormatter)
 	}
 
-	logger.With("app.version", Version).Info("starting miku")
+	logger.With("app.version", version.Version).Info("starting miku")
 
 	bot, err := disgolf.New(token)
 	if err != nil {
@@ -76,7 +75,7 @@ func main() {
 	}
 	defer bot.Close()
 
-	if err := bot.UpdateWatchStatus(0, "for music links"); err != nil {
+	if err := bot.UpdateWatchStatus(0, fmt.Sprintf("for music links (%s)", version.Version)); err != nil {
 		logger.With("err", err).Warn("failed to update listening status")
 	}
 

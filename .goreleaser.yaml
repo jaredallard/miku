@@ -12,7 +12,7 @@ builds:
       - -s
       - -w
       ## <<Stencil::Block(mikuLdflags)>>
-      - -X main.version={{ .Version }}
+      - -X github.com/jaredallard/miku/internal/version.Version={{ .Version }}
       ## <</Stencil::Block>>
     env:
       - CGO_ENABLED=0
@@ -72,7 +72,7 @@ docker_manifests:
 checksum:
   name_template: "checksums.txt"
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 changelog:
   use: git
 release:
