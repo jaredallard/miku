@@ -3,8 +3,8 @@
 [tools]
 bun = "latest"
 git-cliff = "latest"
-golang = "1.22"
-golangci-lint = "1.59"
+golang = "1.23.0"
+golangci-lint = "1.60"
 goreleaser = "latest"
 "go:gotest.tools/gotestsum" = "v1.12.0"
 "go:golang.org/x/tools/cmd/goimports" = "latest"
