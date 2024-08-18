@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Jared Allard <jaredallard@users.noreply.github.com>
+// Copyright (C) 2024 miku contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -7,11 +7,13 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+// SPDX-License-Identifier: GPL-3.0
 
 // Package handler contains the main Discord-related logic for handling
 // messages.
@@ -22,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
@@ -108,7 +111,7 @@ func (h *Handler) EventHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 	}
 
 	// Send a message back to the user.
-	if err := h.sendMessage(s, m, originalSong, alts); err != nil {
+	if err := h.sendMessage(s, m, urls, originalSong, alts); err != nil {
 		h.log.With("err", err).Error("failed to send message")
 		return
 	}
@@ -147,8 +150,8 @@ func (h *Handler) NewURL(ctx context.Context, url string) (*streamingproviders.S
 
 // sendMessage sends a reply to the original message with information on
 // the current song as well as alternatives.
-func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, song *streamingproviders.Song,
-	alts []*streamingproviders.Song) error {
+func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, urls []string,
+	song *streamingproviders.Song, alts []*streamingproviders.Song) error {
 
 	// Convert the duration into a human readable format.
 	duration := fmt.Sprintf("%d:%02d", song.Duration/60, song.Duration%60)
@@ -157,7 +160,7 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 		Embeds: []*discordgo.MessageEmbed{{
 			Type:        discordgo.EmbedTypeRich,
 			Title:       song.Title,
-			Description: song.Artists[0], // TODO: Support more.
+			Description: strings.Join(song.Artists, ", "),
 			URL:         song.ProviderURL,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL:    song.AlbumArtURL,
@@ -168,6 +171,18 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 				Text: fmt.Sprintf("%s · Duration %s · Shared by @%s", song.Provider.Name, duration, m.Author.Username),
 			},
 		}},
+	}
+
+	// Remove URLs from the original message and see if there's still
+	// anything left. If so, we should send it with the message.
+	content := m.Content
+	for _, url := range urls {
+		content = strings.Replace(content, url, "", 1)
+	}
+	content = strings.TrimSpace(content)
+
+	if content != "" {
+		msg.Content = fmt.Sprintf(" > %s: %s", m.Author.Mention(), content)
 	}
 
 	// Create a copy of alts with the original song. We want to show it at
@@ -196,14 +211,14 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
 
-	h.log.With("discord.message", string(m.Reference().MessageID)).Debug("deleting original message")
-	if err := s.ChannelMessageDelete(m.ChannelID, m.ID); err != nil {
-		return fmt.Errorf("failed to delete original message: %w", err)
-	}
-
 	h.log.With("discord.message", string(b)).Debug("sending message")
 	if _, err := s.ChannelMessageSendComplex(m.ChannelID, msg); err != nil {
 		return fmt.Errorf("failed to send reply: %w", err)
+	}
+
+	h.log.With("discord.message", string(m.Reference().MessageID)).Debug("deleting original message")
+	if err := s.ChannelMessageDelete(m.ChannelID, m.ID); err != nil {
+		return fmt.Errorf("failed to delete original message: %w", err)
 	}
 
 	return nil
