@@ -22,15 +22,17 @@ will at minimum require a Discord bot. To create one, follow the steps
 below:
 
 1. Create a new Discord bot with the following scopes:
- - `bot`
- - `Send Messages`
- - `Read Messages`
- - Enable the `Message Content` toggle under `Privileged Gateway Intents`
+
+- `bot`
+- `Send Messages`
+- `Read Messages`
+- Enable the `Message Content` toggle under `Privileged Gateway Intents`
+
 2. Invite the bot to your server using the following URL (change the
    client ID to your bot's client ID).
-    ```
-    https://discord.com/api/oauth2/authorize?client_id=<client_id>&permissions=3072&scope=bot
-    ```
+   ```
+   https://discord.com/api/oauth2/authorize?client_id=<client_id>&permissions=3072&scope=bot
+   ```
 3. Generate a Bot Token and take note of it.
 
 Set the following environment variables:
@@ -68,11 +70,11 @@ to be regenerated. This will eventually be automated.
    [here](https://developer.apple.com/help/account/configure-app-capabilities/create-a-media-identifier-and-private-key/).
 2. Ensure you downloaded a `.p8` and have your Team ID and Key ID ready.
 3. Run the following command to generate a token:
-    ```bash
-    go run github.com/minchao/go-apple-music/examples/token-generator@latest \
-      -l 15777000 -t "<Team_ID>" -pf "$HOME/Downloads/AuthKey_<Key_ID>.p8" \
-      -k "<Key_ID>"
-    ```
+   ```bash
+   go run github.com/minchao/go-apple-music/examples/token-generator@latest \
+     -l 15777000 -t "<Team_ID>" -pf "$HOME/Downloads/AuthKey_<Key_ID>.p8" \
+     -k "<Key_ID>"
+   ```
 
 Set the following environment variables:
 
