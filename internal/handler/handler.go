@@ -180,6 +180,7 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 		content = strings.Replace(content, url, "", 1)
 	}
 	content = strings.TrimSpace(content)
+	content = strings.TrimSuffix(content, ":")
 
 	if content != "" {
 		msg.Content = fmt.Sprintf(" > %s: %s", m.Author.Mention(), content)
