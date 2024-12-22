@@ -42,8 +42,11 @@ type Provider struct {
 
 // New returns a new TIDAL client using the following environment
 // variables:
+//
 // - MIKU_TIDAL_CLIENT_ID
 // - MIKU_TIDAL_CLIENT_SECRET
+//
+//nolint:gocritic,unparam // Why: OK w/ shadow
 func New(ctx context.Context, log *log.Logger) (streamingproviders.Provider, error) {
 	clientID := os.Getenv("MIKU_TIDAL_CLIENT_ID")
 	clientSecret := os.Getenv("MIKU_TIDAL_CLIENT_SECRET")

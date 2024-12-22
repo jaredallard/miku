@@ -121,9 +121,11 @@ func (h *Handler) EventHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 // searches all provides (minus the one the song was found on) and
 // returns alternative streamingproviders where that song was found (the
 // alternatives).
-func (h *Handler) NewURL(ctx context.Context, url string) (*streamingproviders.Song,
+//
+//nolint:gocritic // Why: Documented above.
+func (h *Handler) NewURL(ctx context.Context, urlStr string) (*streamingproviders.Song,
 	[]*streamingproviders.Song, error) {
-	originalSong, alts := h.findAlts(ctx, url)
+	originalSong, alts := h.findAlts(ctx, urlStr)
 	if originalSong == nil {
 		return nil, nil, fmt.Errorf("failed to find original song")
 	}
@@ -152,7 +154,6 @@ func (h *Handler) NewURL(ctx context.Context, url string) (*streamingproviders.S
 // the current song as well as alternatives.
 func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, urls []string,
 	song *streamingproviders.Song, alts []*streamingproviders.Song) error {
-
 	// Convert the duration into a human readable format.
 	duration := fmt.Sprintf("%d:%02d", song.Duration/60, song.Duration%60)
 
@@ -217,7 +218,7 @@ func (h *Handler) sendMessage(s *discordgo.Session, m *discordgo.MessageCreate, 
 		return fmt.Errorf("failed to send reply: %w", err)
 	}
 
-	h.log.With("discord.message", string(m.Reference().MessageID)).Debug("deleting original message")
+	h.log.With("discord.message", m.Reference().MessageID).Debug("deleting original message")
 	if err := s.ChannelMessageDelete(m.ChannelID, m.ID); err != nil {
 		return fmt.Errorf("failed to delete original message: %w", err)
 	}
@@ -264,8 +265,10 @@ func (h *Handler) findOriginalSongByURL(ctx context.Context, urlStr string) *str
 
 // findAlts takes a URL and returns a list of all known songs for that
 // URL across enabled providers.
-func (h *Handler) findAlts(ctx context.Context, url string) (*streamingproviders.Song, []*streamingproviders.Song) {
-	song := h.findOriginalSongByURL(ctx, url)
+//
+//nolint:gocritic // Why: Documented above.
+func (h *Handler) findAlts(ctx context.Context, urlStr string) (*streamingproviders.Song, []*streamingproviders.Song) {
+	song := h.findOriginalSongByURL(ctx, urlStr)
 	if song == nil {
 		return nil, nil
 	}

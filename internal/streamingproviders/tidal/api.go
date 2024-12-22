@@ -43,7 +43,9 @@ type client struct {
 }
 
 // newClient creates a new client using the provided clientID and
-// clientSecret.
+// clientSecret.'
+//
+//nolint:gocritic,unparam // Why: OK w/ shadow, match interface.
 func newClient(ctx context.Context, clientID, clientSecret string, log *log.Logger) (*client, error) {
 	config := &clientcredentials.Config{
 		ClientID:     clientID,
@@ -87,8 +89,8 @@ func (c *client) do(ctx context.Context, req *http.Request) (*http.Response, err
 	return resp, nil
 }
 
-func (c *client) get(ctx context.Context, url string, params map[string]string) (*http.Response, error) {
-	reqURL := tidalAPI.JoinPath(url)
+func (c *client) get(ctx context.Context, urlStr string, params map[string]string) (*http.Response, error) {
+	reqURL := tidalAPI.JoinPath(urlStr)
 
 	// add the user-provided params to the query string.
 	reqQuery := reqURL.Query()
@@ -97,7 +99,7 @@ func (c *client) get(ctx context.Context, url string, params map[string]string) 
 	}
 	reqURL.RawQuery = reqQuery.Encode()
 
-	req, err := http.NewRequest("GET", reqURL.String(), nil)
+	req, err := http.NewRequest("GET", reqURL.String(), http.NoBody)
 	if err != nil {
 		return nil, err
 	}

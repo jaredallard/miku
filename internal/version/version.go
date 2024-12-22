@@ -22,6 +22,9 @@ import "strings"
 // Version is the version of the application.
 var Version = "dev"
 
+// init populates the Version with a v prefix.
+//
+//nolint:gochecknoinits // Why: init is the right place for this.
 func init() {
 	// Ensure we always have a v prefix.
 	Version = "v" + strings.TrimPrefix(Version, "v")
