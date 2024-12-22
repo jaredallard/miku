@@ -46,6 +46,7 @@ launch.json
 # Currently a build artifact
 CHANGELOG.md
 
-## Deviation: We use .env
+## <<Stencil::Block(custom)>>
 .env.*
 !.env.example
+## <</Stencil::Block>>
