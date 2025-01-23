@@ -106,6 +106,16 @@ func (h *Handler) EventHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 
 	originalSong, alts, err := h.NewURL(ctx, urls[0])
 	if err != nil {
+		if err := s.MessageReactionAdd(m.ChannelID, m.ID, "❌"); err != nil {
+			h.log.With("err", err).Error("failed to add reaction")
+		}
+		if _, err := s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Content:   fmt.Sprintf("```go\nFailed to process %q: %v\n```", urls[0], err),
+			Reference: m.Reference(),
+		}); err != nil {
+			h.log.With("err", err).Error("failed to notify user of failure reason")
+		}
+
 		h.log.With("err", err).Error("failed to handle url")
 		return
 	}
@@ -136,7 +146,7 @@ func (h *Handler) NewURL(ctx context.Context, urlStr string) (*streamingprovider
 		"song.artists", originalSong.Artists,
 	).Info("found original song")
 	if len(alts) == 0 {
-		return nil, nil, fmt.Errorf("failed to find alternatives for song")
+		return originalSong, nil, nil
 	}
 
 	for _, alt := range alts {
