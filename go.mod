@@ -1,8 +1,8 @@
 module github.com/jaredallard/miku
 
-go 1.22.0
+go 1.23.0
 
-toolchain go1.23.5
+toolchain go1.24.0
 
 require (
 	github.com/FedorLap2006/disgolf v0.0.0-20221004200601-99cfc3d9a0e1
@@ -10,7 +10,7 @@ require (
 	github.com/charmbracelet/log v0.4.0
 	github.com/minchao/go-apple-music v0.0.0-20230815040201-3b2aec2d7ffe
 	github.com/zmb3/spotify/v2 v2.4.3
-	golang.org/x/oauth2 v0.26.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/term v0.29.0
 	mvdan.cc/xurls/v2 v2.6.0
 )
