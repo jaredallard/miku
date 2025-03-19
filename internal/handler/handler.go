@@ -22,6 +22,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -34,6 +35,10 @@ import (
 	"github.com/jaredallard/miku/internal/streamingproviders/tidal"
 	"mvdan.cc/xurls/v2"
 )
+
+// ErrFailedToFindOriginal is returned when a URL could not be matched
+// to a song on any provider.
+var ErrFailedToFindOriginal = errors.New("failed to find original song")
 
 // TODO: move somewhere else
 type Config struct {
@@ -106,14 +111,18 @@ func (h *Handler) EventHandler(s *discordgo.Session, m *discordgo.MessageCreate)
 
 	originalSong, alts, err := h.NewURL(ctx, urls[0])
 	if err != nil {
-		if err := s.MessageReactionAdd(m.ChannelID, m.ID, "❌"); err != nil {
-			h.log.With("err", err).Error("failed to add reaction")
-		}
-		if _, err := s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-			Content:   fmt.Sprintf("```go\nFailed to process %q: %v\n```", urls[0], err),
-			Reference: m.Reference(),
-		}); err != nil {
-			h.log.With("err", err).Error("failed to notify user of failure reason")
+		// If we're an error other than failing to find the original song at
+		// all, report it to the user.
+		if !errors.Is(err, ErrFailedToFindOriginal) {
+			if err := s.MessageReactionAdd(m.ChannelID, m.ID, "❌"); err != nil {
+				h.log.With("err", err).Error("failed to add reaction")
+			}
+			if _, err := s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+				Content:   fmt.Sprintf("```go\nFailed to process %q: %v\n```", urls[0], err),
+				Reference: m.Reference(),
+			}); err != nil {
+				h.log.With("err", err).Error("failed to notify user of failure reason")
+			}
 		}
 
 		h.log.With("err", err).Error("failed to handle url")
@@ -137,7 +146,7 @@ func (h *Handler) NewURL(ctx context.Context, urlStr string) (*streamingprovider
 	[]*streamingproviders.Song, error) {
 	originalSong, alts := h.findAlts(ctx, urlStr)
 	if originalSong == nil {
-		return nil, nil, fmt.Errorf("failed to find original song")
+		return nil, nil, ErrFailedToFindOriginal
 	}
 	h.log.With(
 		"song.isrc", originalSong.ISRC,
