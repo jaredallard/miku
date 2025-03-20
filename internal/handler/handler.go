@@ -32,7 +32,6 @@ import (
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	"github.com/jaredallard/miku/internal/streamingproviders/applemusic"
 	"github.com/jaredallard/miku/internal/streamingproviders/spotify"
-	"github.com/jaredallard/miku/internal/streamingproviders/tidal"
 	"mvdan.cc/xurls/v2"
 )
 
@@ -61,7 +60,6 @@ func New(conf *Config, logger *log.Logger) *Handler {
 	enabledProviders := []func(context.Context, *log.Logger) (streamingproviders.Provider, error){
 		spotify.New,
 		applemusic.New,
-		tidal.New,
 	}
 	for _, provider := range enabledProviders {
 		plog := logger.With()
