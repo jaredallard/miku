@@ -39,6 +39,8 @@ import (
 // to a song on any provider.
 var ErrFailedToFindOriginal = errors.New("failed to find original song")
 
+// Config contains the configuration for handler.
+//
 // TODO: move somewhere else
 type Config struct {
 	// ChannelID is the channel where the bot should listen to messages
@@ -46,6 +48,8 @@ type Config struct {
 	ChannelID string
 }
 
+// Handler contains the discord bot's configuration and the configured
+// providers.
 type Handler struct {
 	c   *Config
 	log *log.Logger
@@ -84,8 +88,8 @@ func NewWithProviders(conf *Config, logger *log.Logger, sps []streamingproviders
 	return &Handler{conf, logger, sps}
 }
 
-// Handler implements a discordgo.EventHandler for handling new messages
-// being sent.
+// EventHandler implements a [discordgo.EventHandler] for handling new
+// messages being sent.
 func (h *Handler) EventHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	ctx := context.Background()
 	if m.ChannelID != h.c.ChannelID {

@@ -73,7 +73,7 @@ func main() {
 	if err := bot.Open(); err != nil {
 		log.With("err", err).Fatal("failed to start bot")
 	}
-	defer bot.Close()
+	defer bot.Close() //nolint:errcheck,gosec // Why: Best effort.
 
 	if err := bot.UpdateWatchStatus(0, fmt.Sprintf("for music links (%s)", version.Version)); err != nil {
 		logger.With("err", err).Warn("failed to update listening status")

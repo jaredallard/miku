@@ -34,6 +34,7 @@ import (
 
 var _ streamingproviders.Provider = &Provider{}
 
+// Provider implements [streamingproviders.Provider] for Apple Music.
 type Provider struct {
 	client *goapplemusic.Client
 }

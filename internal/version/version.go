@@ -15,6 +15,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0
 
+// Package version contains the version of the application.
 package version
 
 import "strings"
