@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/FedorLap2006/disgolf v0.0.0-20221004200601-99cfc3d9a0e1
 	github.com/bwmarrin/discordgo v0.28.1
-	github.com/charmbracelet/log v0.4.1
+	github.com/charmbracelet/log v0.4.2
 	github.com/minchao/go-apple-music v0.0.0-20230815040201-3b2aec2d7ffe
 	github.com/zmb3/spotify/v2 v2.4.3
 	golang.org/x/oauth2 v0.30.0
