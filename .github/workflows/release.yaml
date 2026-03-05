@@ -72,11 +72,9 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ env.REAL_GITHUB_TOKEN }}
       - name: Set up git user
         uses: fregante/setup-git-user@v2
-      - name: Download syft (SBOM)
-        uses: anchore/sbom-action/download-syft@v0
 
       # Bumping logic
       - name: Get next version
