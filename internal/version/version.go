@@ -1,4 +1,4 @@
-// Copyright (C) 2024 miku contributors
+// Copyright (C) 2026 miku contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 // Package version contains the version of the application.
-package version
+package version //nolint:revive // Why: Acceptable package name.
 
 import "strings"
 

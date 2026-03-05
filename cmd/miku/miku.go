@@ -1,4 +1,4 @@
-// Copyright (C) 2024 miku contributors
+// Copyright (C) 2026 miku contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@ func main() {
 
 	// If we're a terminal AND log format wasn't set to text, default to
 	// JSON. Otherwise, if log format is set to JSON, use JSON.
+	//
+	//nolint:gosec // Why: not an overflow
 	if (!term.IsTerminal(int(os.Stderr.Fd())) && logFormat != "text") || logFormat == "json" {
 		logger.SetFormatter(log.JSONFormatter)
 	}

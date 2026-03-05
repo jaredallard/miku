@@ -1,9 +1,9 @@
 <div align="center">
     <img src=".github/images/example.png" alt="miku example" width="300" />
 
-  <p><em>A Discord bot to convert media links (e.g., Spotify, Apple Music) between each other.</em></p>
+<p><em>A Discord bot to convert media links (e.g., Spotify, Apple Music) between each other.</em></p>
 
-  <a href="https://github.com/jaredallard/miku/releases">
+<a href="https://github.com/jaredallard/miku/releases">
     <img alt="Latest Version" src="https://img.shields.io/github/v/release/jaredallard/miku?style=for-the-badge">
   </a>
   <a href="https://github.com/jaredallard/miku/blob/main/LICENSE">

@@ -1,13 +1,15 @@
-version: 2.5.1
+version: 2.13.0
 modules:
     - name: github.com/rgst-io/stencil-golang
-      url: https://github.com/rgst-io/stencil-golang
+      url: ../../rgst-io/stencil-golang
       version:
-        commit: 8ac4cbc4259fd1575016d53089957690e1364575
-        tag: v1.6.2
+        virtual: local
 files:
     - name: .cliff.toml
       template: .cliff.toml.tpl
+      module: github.com/rgst-io/stencil-golang
+    - name: .dprint.json
+      template: .dprint.json.tpl
       module: github.com/rgst-io/stencil-golang
     - name: .editorconfig
       template: .editorconfig.tpl
@@ -56,7 +58,4 @@ files:
       module: github.com/rgst-io/stencil-golang
     - name: LICENSE
       template: LICENSE.tpl
-      module: github.com/rgst-io/stencil-golang
-    - name: package.json
-      template: package.json.tpl
       module: github.com/rgst-io/stencil-golang
