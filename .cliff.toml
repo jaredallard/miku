@@ -101,3 +101,8 @@ ignore_tags = "rc"
 topo_order = false
 # sort the commits inside sections by oldest/newest order
 sort_commits = "newest"
+
+[remote.gitea]
+api_url = "https://git.rgst.io"
+owner = "jaredallard"
+repo = "miku"
