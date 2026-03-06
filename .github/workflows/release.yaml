@@ -36,6 +36,14 @@ env:
   REAL_GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_WRITE }}
   ## <</Stencil::Block>>
 
+  # Forgejo's Action token does not have permissions to write to the
+  # package registry. For more information, see:
+  # https://codeberg.org/forgejo/forgejo/issues/6198
+  #
+  ## <<Stencil::Block(forgejoPackageToken)>>
+  FORGEJO_PACKAGE_TOKEN: ${{ secrets.FORGEJO_PACKAGES_WRITE }}
+  ## <</Stencil::Block>>
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -70,6 +78,12 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
         with:
+          registry: git.rgst.io
+          username: ${{ github.actor }}
+          password: ${{ env.FORGEJO_PACKAGE_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ env.REAL_GITHUB_TOKEN }}
@@ -100,6 +114,6 @@ jobs:
           goreleaser release --release-notes CHANGELOG.md --clean
         env:
           GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-## <<Stencil::Block(goreleaseEnvVars)>>
+          ## <<Stencil::Block(goreleaseEnvVars)>>
 
-## <</Stencil::Block>>
+          ## <</Stencil::Block>>
