@@ -52,6 +52,16 @@ body = """
     {% endfor -%}
 		{% raw %}\n{% endraw %}\
 {% endfor %}\n
+
+{% if gitea.contributors | filter(attribute="is_first_time", value=true) | length != 0 %}
+  ## New Contributors{% raw %}\n{% endraw -%}
+{%- endif %}\
+{% for contributor in gitea.contributors | filter(attribute="is_first_time", value=true) %}
+  - @{{ contributor.username }} made their first contribution
+    {%- if contributor.pr_number %} in \
+      [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}) \
+    {%- endif %}
+{%- endfor -%}
 """ # template for the changelog body
 # https://keats.github.io/tera/docs/#introduction
 # template for the changelog footer
@@ -101,8 +111,3 @@ ignore_tags = "rc"
 topo_order = false
 # sort the commits inside sections by oldest/newest order
 sort_commits = "newest"
-
-[remote.gitea]
-api_url = "https://git.rgst.io"
-owner = "jaredallard"
-repo = "miku"
