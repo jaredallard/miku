@@ -98,7 +98,8 @@ jobs:
           # which we do not want.
           unset GITHUB_TOKEN
           goreleaser release --release-notes CHANGELOG.md --clean
-        env: {}
+        env:
+          GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ## <<Stencil::Block(goreleaseEnvVars)>>
 
 ## <</Stencil::Block>>
