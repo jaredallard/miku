@@ -9,7 +9,7 @@ require (
 	github.com/minchao/go-apple-music v0.0.0-20230815040201-3b2aec2d7ffe
 	github.com/zmb3/spotify/v2 v2.4.3
 	golang.org/x/oauth2 v0.35.0
-	golang.org/x/term v0.40.0
+	golang.org/x/term v0.41.0
 	mvdan.cc/xurls/v2 v2.6.0
 )
 
@@ -33,5 +33,5 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 )
