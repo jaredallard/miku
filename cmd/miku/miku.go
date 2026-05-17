@@ -77,7 +77,7 @@ func main() {
 	}
 	defer bot.Close() //nolint:errcheck,gosec // Why: Best effort.
 
-	if err := bot.UpdateWatchStatus(0, fmt.Sprintf("for music links (%s)", version.Version)); err != nil {
+	if err := bot.UpdateCustomStatus(fmt.Sprintf("Watching for music links (%s)", version.Version)); err != nil {
 		logger.With("err", err).Warn("failed to update listening status")
 	}
 
