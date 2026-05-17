@@ -5,4 +5,4 @@ arguments:
   vcs: forgejo
   vcs_host: git.rgst.io
 modules:
-  - name: github.com/rgst-io/stencil-golang
+  - name: go.rgst.io/rgst-io/stencil-golang
