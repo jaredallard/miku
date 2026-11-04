@@ -41,7 +41,7 @@ Pass --rc to get the next release candidate version.
 run = ["./.github/scripts/get-next-version.sh"]
 # Pinned to 3.4.0 until https://github.com/caarlos0/svu/issues/292 is
 # fixed.
-tools.svu = "3.4.0"
+tools.svu = "3.4.4"
 
 [tasks.test]
 description = "Run tests"
