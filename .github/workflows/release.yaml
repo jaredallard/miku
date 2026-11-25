@@ -33,7 +33,7 @@ env:
   # https://codeberg.org/forgejo/forgejo/issues/6198
   #
   ## <<Stencil::Block(forgejoPackageToken)>>
-  FORGEJO_PACKAGE_TOKEN: ${{ secrets.FORGEJO_PACKAGES_WRITE }}
+  FORGEJO_PACKAGE_TOKEN: ${{ secrets.PACKAGES_WRITE_FORGEJO_TOKEN }}
   ## <</Stencil::Block>>
 
 jobs:
