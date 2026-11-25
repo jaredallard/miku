@@ -1,14 +1,15 @@
-[tool_alias]
-dprint = "github:dprint/dprint"
-
-# Default versions of tools, to update these, set [tools.override]
 [tools]
-dprint = "latest"
-golang = "1.27.4"
+dprint = "0.65.0"
 golangci-lint = "2.15.0"
-goreleaser = "latest"
+goreleaser = "2.20.3"
 gotestsum = "1.13.0"
 shfmt = "latest"
+svu = "3.4.4"
+git-cliff = "2.14.2"
+go = "1.27.4"
+## <<Stencil::Block(extraTools)>>
+
+## <</Stencil::Block>>
 
 [tasks.build]
 description = "Build a binary for the current platform/architecture"
@@ -18,7 +19,6 @@ run = "go build -trimpath -o ./bin/ -v ./cmd/..."
 description = "Generate a changelog for the current version"
 outputs = ["CHANGELOG.md"]
 run = ["git-cliff --config .cliff.toml --output CHANGELOG.md"]
-tools.git-cliff = "latest"
 
 [tasks.fmt]
 alias = "format"
@@ -28,20 +28,25 @@ run = [
 	"golangci-lint fmt",
 	"shfmt -w .",
 	"dprint fmt '**/*.{json,yaml,yml,md,jsonschema.json}'",
+	## <<Stencil::Block(additionalFormatters)>>
+
+	## <</Stencil::Block>>
 ]
 
 [tasks.lint]
 description = "Run linters"
-run = "golangci-lint run"
+run = [
+	"golangci-lint run",
+	## <<Stencil::Block(additionalLinters)>>
+
+	## <</Stencil::Block>>
+]
 
 [tasks.next-version]
 description = """Get the version number that would be released if a release was ran right now.
 Pass --rc to get the next release candidate version.
 """
 run = ["./.github/scripts/get-next-version.sh"]
-# Pinned to 3.4.0 until https://github.com/caarlos0/svu/issues/292 is
-# fixed.
-tools.svu = "3.4.4"
 
 [tasks.test]
 description = "Run tests"
