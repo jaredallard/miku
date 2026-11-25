@@ -26,8 +26,8 @@ import (
 	"os"
 	"strings"
 
+	"charm.land/log/v2"
 	"github.com/bwmarrin/discordgo"
-	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	goapplemusic "github.com/minchao/go-apple-music"
 )

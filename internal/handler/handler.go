@@ -27,8 +27,8 @@ import (
 	"net/url"
 	"strings"
 
+	"charm.land/log/v2"
 	"github.com/bwmarrin/discordgo"
-	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	"github.com/jaredallard/miku/internal/streamingproviders/applemusic"
 	"github.com/jaredallard/miku/internal/streamingproviders/spotify"

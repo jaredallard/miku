@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/jaredallard/scratch-cacerts:latest
+FROM gcr.io/distroless/static-debian13:nonroot
 ENTRYPOINT ["/usr/local/bin/miku"]
 
 ARG TARGETPLATFORM

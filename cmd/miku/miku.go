@@ -25,9 +25,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"charm.land/log/v2"
 	"github.com/FedorLap2006/disgolf"
 	"github.com/bwmarrin/discordgo"
-	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/handler"
 	"github.com/jaredallard/miku/internal/version"
 	"golang.org/x/term"

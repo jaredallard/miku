@@ -25,8 +25,8 @@ import (
 	"os"
 	"path"
 
+	"charm.land/log/v2"
 	"github.com/bwmarrin/discordgo"
-	"github.com/charmbracelet/log"
 	"github.com/jaredallard/miku/internal/streamingproviders"
 	gospotify "github.com/zmb3/spotify/v2"
 	gospotifyauth "github.com/zmb3/spotify/v2/auth"
